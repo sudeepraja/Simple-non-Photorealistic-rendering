@@ -1,0 +1,16 @@
+im = img~ImageResize~200~ColorConvert~"Grayscale";
+
+gof = im~GradientOrientationFilter~5;
+
+lines = MapIndexed[{GrayLevel@RandomReal[], 
+     Line[{#2 - 2 {Cos[#1], Sin[#1]}, #2 + 2 {Cos[#1], Sin[#1]}}]} &, 
+   Reverse /@ Transpose@ImageData@gof, {2}];
+
+brush = Image[
+   Graphics[lines, 
+    PlotRange -> {{1, #1}, {1, #2}} & @@ ImageDimensions[im], 
+    Background -> GrayLevel[0.5], ImageSize -> ImageDimensions[img]], 
+   ColorSpace -> "Grayscale"];
+tm = Image`ToneMapHDRI[img, Method -> {"AdaptiveLog", "Bias" -> 1.0}];
+
+Image[0.7 (ImageData@Blur[brush, 2] - 0.6) + ImageData@tm]
